@@ -233,27 +233,34 @@ server <- function(input, output) {
                                 ggplot(aes_string(x = "Date", y = metricchoice, col="metricchoice")) + 
                                 geom_line() +
                                 ylab(yaxlab) +
-                                ggtitle(graphtitle) +
-                                labs(caption = "by Geoff Salmon and Joe Laham") 
+                                labs(caption = "Geoff Salmon and Joe Laham", title = graphtitle) + 
+                                theme_minimal() +
+                                theme(plot.title = element_text(hjust = 0.5),
+                                      plot.caption = element_text(hjust = 1.4, face = "italic"),
+                                      title = element_text(family = "Avenir"),
+                                      text = element_text(family = "Avenir"),
+                                      axis.title.x = element_text(margin = margin(t = 10))
+                                      )
                                 
                         
                         # adds forecasted only if Temperature is the selected metric
                         if (input$metric_type == 'Temperature') {
                                 forecastchoice <- forecastchoice[!is.na(forecastchoice)]
                                 forecastlegendlabel <- switch(input$forecasttemp,
-                                                              "option4" = "Forecasted Max Temperature: 0",
-                                                              "option5" = "Forecasted Max Temperature: 1",
-                                                              "option6" = "Forecasted Max Temperature: 2",
-                                                              "option7" = "Forecasted Max Temperature: 3",
-                                                              "option8" = "Forecasted Min Temperature: 0",
-                                                              "option9" = "Forecasted Min Temperature: 1",
-                                                              "option10" = "Forecasted Min Temperature: 2",
-                                                              "option11" = "Forecasted Min Temperature: 3"
+                                                              "option4" = "Forecasted Max: 0",
+                                                              "option5" = "Forecasted Max: 1",
+                                                              "option6" = "Forecasted Max: 2",
+                                                              "option7" = "Forecasted Max: 3",
+                                                              "option8" = "Forecasted Min: 0",
+                                                              "option9" = "Forecasted Min: 1",
+                                                              "option10" = "Forecasted Min: 2",
+                                                              "option11" = "Forecasted Min: 3"
                                 )
                                 
                                 graph + geom_line(data = big %>% filter(city %in% citydata$city[citydata$CityIndex == click$id]), 
                                                   aes_string(x = "Date", y = forecastchoice, col = "forecastchoice")) +
-                                        scale_color_manual(labels = c(forecastlegendlabel, actuallegendlabel), values = c("blue", "red"))
+                                        scale_color_manual(labels = c(forecastlegendlabel, actuallegendlabel), values = c("blue", "red")
+                                                           ,name = input$metric_type)
                         }
                                 
                         
