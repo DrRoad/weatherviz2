@@ -15,13 +15,14 @@
 #save(big,actual,forecast,forecastwide,file='data.RData')
 
 
-load('data.RData')
+#load('data.RData')
 
 require(leaflet)
 require(shiny)
 require(ggplot2)
-
+require(dplyr)
 load('data.RData')
+big$city = as.character(big$city)
 citydata <- unique(big[,c('CityIndex','city','longitude','latitude','state')])
 
 # format the page
@@ -50,6 +51,7 @@ ui <- fluidPage(
                 # dispayed graphs for the city
                 column(8, wellPanel(
                         plotOutput('graphs')
+                
                 ))
         )
 )
@@ -80,17 +82,14 @@ server <- function(input, output) {
                         paste0('Selected City: ',citydata$city[which(citydata$CityIndex == click$id)[1]],
                                ', ',citydata$state[which(citydata$CityIndex == click$id)[1]])
                 })
+
                 output$graphs <- renderPlot({
                         
                         # sets the y axis label
                         yaxlab <- switch(input$metric_type,
                                          "Temperature" = "Temperature (ºF)",
                                          "Humidity" = "Humidity (%)",
-                                         "Precipitation" = if(input$var3 == "option1") {
-                                                                return("Precipitation (in)")
-                                                                } else {
-                                                                        return("Precipitation (% Chance)")
-                                                                },
+                                         "Precipitation" = "Precipitation (% Chance)",
                                          "Dew Point" = "Dew Point",
                                          "Sea Level Pressure" = "Sea Level Pressure",
                                          "Visibility" = "Visibility (miles)",
@@ -103,13 +102,8 @@ server <- function(input, output) {
                                                                 ', ',citydata$state[which(citydata$CityIndex == click$id)[1]]),
                                          "Humidity" = paste0("Humidity in ", citydata$city[which(citydata$CityIndex == click$id)[1]],
                                          ', ',citydata$state[which(citydata$CityIndex == click$id)[1]]),
-                                         "Precipitation" = if(input$var3 == "option1") {
-                                                 return(paste0("Precipitation in", citydata$city[which(citydata$CityIndex == click$id)[1]],
-                                                        ', ',citydata$state[which(citydata$CityIndex == click$id)[1]]))
-                                         } else {
-                                                 return(paste0("Chance of Precipitation in", citydata$city[which(citydata$CityIndex == click$id)[1]],
-                                                               ', ',citydata$state[which(citydata$CityIndex == click$id)[1]]))
-                                         },
+                                         "Precipitation" = paste0("Chance of Precipitation in", citydata$city[which(citydata$CityIndex == click$id)[1]],
+                                                               ', ',citydata$state[which(citydata$CityIndex == click$id)[1]]),
                                          "Dew Point" = paste0("Dew Point in ", citydata$city[which(citydata$CityIndex == click$id)[1]],
                                                               ', ',citydata$state[which(citydata$CityIndex == click$id)[1]]),
                                          "Sea Level Pressure" = paste0("Sea Level Pressure in ", citydata$city[which(citydata$CityIndex == click$id)[1]],
@@ -134,7 +128,6 @@ server <- function(input, output) {
                                                                    "option3" = "Min Humidity"
                                                ),
                                                "Precipitation" = switch(input$var3,
-                                                                        "option1" = "Actual Precipitation",
                                                                         "option2" = "Chance of Precipitation: 0",
                                                                         "option3" = "Chance of Precipitation: 1",
                                                                         "option4" = "Chance of Precipitation: 2",
@@ -179,7 +172,6 @@ server <- function(input, output) {
                                                 "option3" = "Min_Humidity"
                                 ),
                                 "Precipitation" = switch(input$var3,
-                                                "option1" = "PrecipitationIn",
                                                 "option2" = "FProbPrecip_Days0",
                                                 "option3" = "FProbPrecip_Days1",
                                                 "option4" = "FProbPrecip_Days2",
@@ -226,7 +218,7 @@ server <- function(input, output) {
                         }
                         
                         # remove missing values
-                        metricchoice <- metricchoice[!is.na(metricchoice)]
+                        #metricchoice <- metricchoice[!is.na(metricchoice)]
                         
                         # ggplot graph takes city as input
                         graph <- big %>% filter(city %in% citydata$city[citydata$CityIndex == click$id]) %>%
@@ -236,7 +228,7 @@ server <- function(input, output) {
                                 labs(caption = "Geoff Salmon and Joe Laham", title = graphtitle) + 
                                 theme_minimal() +
                                 theme(plot.title = element_text(hjust = 0.5),
-                                      plot.caption = element_text(hjust = 1.4, face = "italic"),
+                                      plot.caption = element_text(hjust = 1.3, face = "italic"),
                                       title = element_text(family = "Avenir"),
                                       text = element_text(family = "Avenir"),
                                       axis.title.x = element_text(margin = margin(t = 10))
@@ -260,7 +252,11 @@ server <- function(input, output) {
                                 graph + geom_line(data = big %>% filter(city %in% citydata$city[citydata$CityIndex == click$id]), 
                                                   aes_string(x = "Date", y = forecastchoice, col = "forecastchoice")) +
                                         scale_color_manual(labels = c(forecastlegendlabel, actuallegendlabel), values = c("blue", "red")
-                                                           ,name = input$metric_type)
+                                                           , name = input$metric_type)
+                        } else { 
+                                graph + 
+                                scale_color_manual(labels = actuallegendlabel, values = "red"
+                                                   , name = input$metric_type)
                         }
                                 
                         
@@ -281,8 +277,7 @@ server <- function(input, output) {
                                                              "Min Humidity" = "option3"
                                                  )), 
                        "Precipitation" = radioButtons('var3',label='Choose Variable',
-                                                      choices = c("Actual Precipitation" = "option1",
-                                                                  "Chance of Precipitation: 0" = "option2",
+                                                      choices = c("Chance of Precipitation: 0" = "option2",
                                                                   "Chance of Precipitation: 1" = "option3",
                                                                   "Chance of Precipitation: 2" = "option4",
                                                                   "Chance of Precipitation: 3" = "option5",
