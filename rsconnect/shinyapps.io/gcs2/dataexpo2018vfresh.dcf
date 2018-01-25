@@ -1,0 +1,13 @@
+name: dataexpo2018vfresh
+title:
+username:
+account: gcs2
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 261695
+bundleId: 1193270
+url: https://gcs2.shinyapps.io/dataexpo2018vfresh/
+when: 1516918430.43343
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|clean.R|Description.txt|forecast.dat|histWeather.csv|LeafletCities.R|locations.csv|weathervisualized.R|www/.DS_Store|www/style.css

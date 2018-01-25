@@ -4,7 +4,7 @@ require(lubridate) #install.packages('lubridate') if not available
 
 loc <- read.csv('locations.csv')
 loc$CityIndex <- 1:nrow(loc)
-actual <- read.csv('histweather.csv')
+actual <- read.csv('histWeather.csv')
 actual <- left_join(actual,loc,by = c('AirPtCd')) #info from loc and actual are now merged into actual
 actual$Date <- ymd(actual$Date)
 actual$PrecipitationIn <- as.numeric(as.character(actual$PrecipitationIn))
